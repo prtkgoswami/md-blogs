@@ -3,32 +3,39 @@ import { ChangeEvent, ReactElement, useEffect, useState } from "react";
 import "./index.css";
 
 const Header = (): ReactElement => {
-  const defaultDarkTheme =
-    "theme" in localStorage
-      ? localStorage.getItem("theme") === "dark"
-      : window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const [isDark, setIsDark] = useState(defaultDarkTheme);
+  const [isDark, setIsDark] = useState(false);
 
   const handleDarkToggle = (e: ChangeEvent) => {
     const toggle = e.target as HTMLInputElement;
+    const isDarkSelected = toggle.checked;
+
+    const currStoredTheme =
+      "theme" in localStorage ? localStorage.getItem("theme") : "light";
+    if (
+      (isDarkSelected && currStoredTheme !== "dark") ||
+      (!isDarkSelected && currStoredTheme !== "light")
+    ) {
+      localStorage.setItem("theme", isDarkSelected ? "dark" : "light");
+    }
+
     setIsDark(toggle.checked);
   };
 
   useEffect(() => {
-    const currStoredTheme = localStorage.getItem("theme");
-    if (
-      (isDark && currStoredTheme !== "dark") ||
-      (!isDark && currStoredTheme !== "light")
-    ) {
-      localStorage.setItem("theme", isDark ? "dark" : "light");
-    }
-
     if (isDark) {
       document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark");
     }
   }, [isDark]);
+
+  useEffect(() => {
+    setIsDark(
+      "theme" in localStorage
+        ? localStorage.getItem("theme") === "dark"
+        : window.matchMedia("(prefers-color-scheme: dark)").matches
+    );
+  }, []);
 
   return (
     <div className="w-full flex flex-col pt-5 pb-10 px-5 bg-slate-800">
